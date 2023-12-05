@@ -1,0 +1,75 @@
+import pygame
+import sys
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Set up display
+width, height = 600, 400
+win = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Snake Game")
+
+# Colors
+white = (255, 255, 255)
+black = (0, 0, 0)
+red = (255, 0, 0)
+
+# Snake properties
+snake_block = 10
+snake_speed = 15
+
+# Initialize snake
+snake = [(width / 2, height / 2)]
+snake_direction = (0, 0)
+
+# Initialize food
+food_position = (random.randrange(1, width // 10) * 10, random.randrange(1, height // 10) * 10)
+
+# Game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP and snake_direction != (0, 10):
+                snake_direction = (0, -10)
+            elif event.key == pygame.K_DOWN and snake_direction != (0, -10):
+                snake_direction = (0, 10)
+            elif event.key == pygame.K_LEFT and snake_direction != (10, 0):
+                snake_direction = (-10, 0)
+            elif event.key == pygame.K_RIGHT and snake_direction != (-10, 0):
+                snake_direction = (10, 0)
+
+    # Move snake
+    new_head = (snake[0][0] + snake_direction[0], snake[0][1] + snake_direction[1])
+    snake.insert(0, new_head)
+
+    # Check for collision with food
+    if snake[0] == food_position:
+        food_position = (random.randrange(1, width // 10) * 10, random.randrange(1, height // 10) * 10)
+    else:
+        snake.pop()
+
+    # Check for collision with walls or itself
+    if (
+        new_head[0] >= width
+        or new_head[0] < 0
+        or new_head[1] >= height
+        or new_head[1] < 0
+        or new_head in snake[1:]
+    ):
+        pygame.quit()
+        sys.exit()
+
+    # Draw everything
+    win.fill(white)
+    pygame.draw.rect(win, red, (food_position[0], food_position[1], snake_block, snake_block))
+    for segment in snake:
+        pygame.draw.rect(win, black, (segment[0], segment[1], snake_block, snake_block))
+
+    pygame.display.update()
+
+    # Control game speed
+    pygame.time.Clock().tick(snake_speed)
